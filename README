@@ -1,0 +1,4 @@
+Justin: parsing the input files, creating HMMs and associated objects
+Howell: Pattern Recognition - the forward algorithm
+Abhinay: State-Path Determination - Viterbi algorithm
+David: Model Optimization - Baum-Welch algorithm
