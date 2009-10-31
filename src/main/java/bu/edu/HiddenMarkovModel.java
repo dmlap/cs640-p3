@@ -3,6 +3,7 @@
  */
 package bu.edu;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,6 +19,15 @@ public class HiddenMarkovModel {
 	private final double[][] transitions;
 	private final double[][] observations;
 	private final double[] initials;
+	
+	public HiddenMarkovModel() {
+		this.states = new ArrayList<String>();
+		this.T = 0;
+		this.vocabulary = new ArrayList<String>();
+		this.transitions = new double[0][0];
+		this.observations = new double[0][0];
+		this.initials = new double[0];
+	}
 
 	/**n/ 
 	 * Constructs a new {@link HiddenMarkovModel} with the specified parameters.
@@ -55,7 +65,7 @@ public class HiddenMarkovModel {
 		return vocabulary;
 	}
 
-	public double[][] getTransitionProbabilites() {
+	public double[][] getTransitionProbabilities() {
 		return transitions;
 	}
 
