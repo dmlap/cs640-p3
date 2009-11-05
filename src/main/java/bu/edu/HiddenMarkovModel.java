@@ -4,7 +4,10 @@
 package bu.edu;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An object which simulates a hidden Markov model.
@@ -29,13 +32,16 @@ public class HiddenMarkovModel {
 		this.initials = new double[0];
 	}
 
-	/**n/ 
-	 * Constructs a new {@link HiddenMarkovModel} with the specified parameters.
+	/**
+	 * n/ Constructs a new {@link HiddenMarkovModel} with the specified
+	 * parameters.
 	 * 
 	 * @param states
 	 *            - the {@link State States} of the model
 	 * @param T
-	 * 			  - the number of time steps or length of observation sequences
+	 *            - the number of time steps or length of observation sequences
+	 * @param vocabulary
+	 *            - the observation symbol alphabet
 	 * @param transitions
 	 *            - the state transition probability distribution matrix
 	 * @param observations
@@ -75,5 +81,46 @@ public class HiddenMarkovModel {
 
 	public double[] getInitialStateDistribution() {
 		return initials;
+	}
+	
+	/**
+	 * Returns a table of the observation set number to the observed vocabulary
+	 * index at a given time.
+	 * 
+	 * @param observations
+	 *            - the set of {@link Observations} to build the table from.
+	 * @return a table of the observation set number to the observed vocabulary
+	 *         index at a given time.
+	 */
+	public int[][] translate(Observations observations) {
+		// build vocab lookup table
+		Map<String, Integer> translations = new HashMap<String, Integer>();
+		for (int i = 0; i < getVocabulary().size(); ++i) {
+			translations.put(getVocabulary().get(i), i);
+		}
+		int[][] words;
+		words = new int[observations.getDatasets().size()][];
+		for (int i = 0; i < words.length; ++i) {
+			words[i] = translate(observations.getDatasets().get(i), translations);
+		}
+		return words;
+	}
+	
+	/**
+	 * @see #translate(Observations)
+	 * @param observation
+	 * @return
+	 */
+	public int[] translate(String[] observation) {
+		return translate(new Observations(1, Collections
+				.singletonList(observation)))[0];
+	}
+	
+	private int[] translate(String[] observation, Map<String, Integer> lookup) {
+		int[] result = new int[observation.length];
+			for (int i = 0; i < result.length; ++i) {
+				result[i] = lookup.get(observation[i]);
+			}
+		return result;
 	}
 }

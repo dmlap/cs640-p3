@@ -1,40 +1,17 @@
 package bu.edu;
 
+
 public class Forward {
 	private HiddenMarkovModel hmm;
-	private Observations obs;
 
-	public Forward(HiddenMarkovModel h, Observations o) {
+	public Forward(HiddenMarkovModel h) {
 		this.hmm = h;
-		this.obs = o;
 	}
 
-	private int wordIndex(int set, int t) {
-		String currentWord = this.obs.getDatasets().get(set)[t];
-		return hmm.getVocabulary().indexOf(currentWord);
-	}
-
-	private double recognize(int set) {
-		double[][] A = hmm.getTransitionProbabilities();
-		double[][] B = hmm.getObservationProbabilities();
-		double[] pi = hmm.getInitialStateDistribution();
-		int T = obs.getDatasets().get(set).length; // size of observation sequence
+	private double recognize(int[] observation) {
+		int T = observation.length; // size of observation sequence
 		int N = hmm.getStates().size(); // number of state nodes
-		double[][] alpha = new double[N][T];
-		
-		for (int t = 0; t < T; t++) { // outer loop (t=1...T)
-			for (int i = 0; i < N; i++) { // inner loop (i=1...N)
-				if (t == 0) // initialization
-					alpha[i][t] = pi[i] * B[i][wordIndex(set, t)];
-				else {
-					for (int ii = 0; ii < N; ii++) {
-						alpha[i][t] += alpha[ii][t - 1] * A[ii][i];
-					}// ii = N
-					
-					alpha[i][t] *= B[i][wordIndex(set, t)];
-				}
-			}// i = N
-		}// t = T
+		double[][] alpha = alpha(observation);
 		
 		double sum = 0;
 		for (int i = 0; i < N; i++)
@@ -43,9 +20,42 @@ public class Forward {
 		return sum;
 	}
 	
-	public void recognizeDatasets() {
-		for (int i = 0; i < obs.getCount(); i++) {
-			double prob = recognize(i);
+	/**
+	 * Returns the values of alpha in a state-time matrix
+	 * 
+	 * @param observation
+	 *            - the time-ordered sequence of observed symbols
+	 * @return a state-by-time indexed matrix of the values of alpha for the
+	 *         observation sequence.
+	 */
+	public double[][] alpha(int[] observation) {
+		int T = observation.length;
+		int N = hmm.getStates().size(); // number of state nodes
+		double[][] A = hmm.getTransitionProbabilities();
+		double[][] B = hmm.getObservationProbabilities();
+		double[] pi = hmm.getInitialStateDistribution();
+		double[][] alpha = new double[T][N];
+		
+		for (int t = 0; t < T; t++) { // outer loop (t=1...time)
+			for (int i = 0; i < N; i++) { // inner loop (i=1...N)
+				if (t == 0) // initialization
+					alpha[t][i] = pi[i] * B[i][observation[t]];
+				else {
+					for (int ii = 0; ii < N; ii++) {
+						alpha[t][i] += alpha[t - 1][ii] * A[ii][i];
+					}// ii = N
+					
+					alpha[t][i] *= B[i][observation[t]];
+				}
+			}// i = N
+		}// t = time
+		return alpha;
+	}
+	
+	public void recognizeDatasets(Observations observations) {
+		int[][] translateds = hmm.translate(observations);
+		for (int[] translated : translateds) {
+			double prob = recognize(translated);
 			System.out.println(prob);
 		}
 	}

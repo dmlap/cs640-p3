@@ -25,8 +25,8 @@ public class App {
 			if (operation == "optimize")
 				; // TODO: call function
 			else if (operation == "recognize") {
-				Forward fwd = new Forward(hmm, obs);
-				fwd.recognizeDatasets();
+				Forward fwd = new Forward(hmm);
+				fwd.recognizeDatasets(obs);
 			}
 			else if (operation == "statepath") {
 				ViterbiAlgorithm viterbi = new ViterbiAlgorithm(hmm, obs);
