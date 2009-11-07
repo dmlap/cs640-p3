@@ -123,4 +123,26 @@ public class HiddenMarkovModel {
 			}
 		return result;
 	}
+	
+	public String toString() {
+		StringBuilder result = new StringBuilder("a:\n");
+		for(double[] as : transitions) {
+			for (double a : as) {
+				result.append(a + " ");
+			}
+			result.append("\n");
+		}
+		result.append("b:\n");
+		for (double[] bs : observations) {
+			for (double b : bs) {
+				result.append(b + " ");
+			}
+			result.append("\n");
+		}
+		result.append("pi:\n");
+		for(double pi : initials) {
+			result.append(pi + " ");
+		}
+		return result.append("\n").toString();
+	}
 }

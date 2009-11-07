@@ -20,7 +20,7 @@ public class BaumWelchOptimizer {
 		return optimize(input, output[0]);
 	};
 	
-	private HiddenMarkovModel optimize(HiddenMarkovModel input, int[] observation) {
+	public HiddenMarkovModel optimize(HiddenMarkovModel input, int[] observation) {
 		Forward forward = new Forward(input);
 		Backward backward = new Backward(input);
 		double [][] alphas = forward.alpha(observation);
@@ -29,19 +29,20 @@ public class BaumWelchOptimizer {
 		// calculate pi'
 		double[] pi = new double[input.getObservationProbabilities().length];
 		for (int i = 0; i < pi.length; ++i) {
-			pi[i] = gamma(1, i, alphas, betas);
+			pi[i] = gamma(0, i, alphas, betas);
 		}
 		// calculate A'
-		double[][] a = new double[input.getObservationProbabilities().length][input.getObservationProbabilities().length];
+		double[][] a = new double[input.getTransitionProbabilities().length][input.getTransitionProbabilities()[0].length];
 		for (int i = 0; i < input.getTransitionProbabilities().length; ++i) {
 			for (int j = 0; j < input.getTransitionProbabilities()[0].length; ++j) {
-				double sumEpsilon = 0D;
+				double sumXi = 0D;
 				double sumGamma = 0D;
 				for (int t = 0; t < observation.length - 1; ++t) {
-					sumEpsilon += epsilon(t, i, j, input, observation, alphas, betas);
+					sumXi += xi(t, i, j, input, observation, alphas, betas);
 					sumGamma += gamma(t, i, alphas, betas);
 				}
-				a[i][j] = sumEpsilon / sumGamma;
+				// only update the transition probability if it is defined
+				a[i][j] = sumGamma != 0 ? sumXi / sumGamma : input.getTransitionProbabilities()[i][j];
 			}
 		}
 		
@@ -50,18 +51,32 @@ public class BaumWelchOptimizer {
 				.getObservationProbabilities()[0].length];
 		for (int j = 0; j < input.getObservationProbabilities().length; ++j) {
 			for (int k = 0; k < input.getObservationProbabilities()[0].length; ++k) {
-				double sumGammaK = 0D;
+				double sumGammaK = 0D; // gammas for times t where observation[t] == k
+				double sumGamma = 0D; // all gammas
 				for (int t = 0; t < observation.length; ++t) {
-					sumGammaK += gamma(t, j, alphas, betas);
+					double gamma = gamma(t, j, alphas, betas);
+					sumGammaK += observation[t] == k ? gamma : 0;
+					sumGamma += gamma;
 				}
-				b[j][k] = sumGammaK * input.getObservationProbabilities()[j][k] / sumGammaK;
+				// only update observation probability if it is defined
+				b[j][k] = sumGamma != 0 ? sumGammaK / sumGamma : input.getObservationProbabilities()[j][k];
 			}
 		}
 		return new HiddenMarkovModel(input.getStates(), observation.length, input
 				.getVocabulary(), a, b, pi);
 	}
 
-	private double epsilon(int t, int i, int j, HiddenMarkovModel input,
+	/**
+	 * @param t
+	 * @param i
+	 * @param j
+	 * @param input
+	 * @param observation
+	 * @param alphas
+	 * @param betas
+	 * @return
+	 */
+	private double xi(int t, int i, int j, HiddenMarkovModel input,
 			int[] observation, double[][] alphas, double[][] betas) {
 		double numerator = alphas[t][i]
 				* input.getTransitionProbabilities()[i][j]
@@ -70,10 +85,10 @@ public class BaumWelchOptimizer {
 		double denominator = 0D;
 		for (int l = 0; l < input.getTransitionProbabilities().length; ++l) {
 			for (int m = 0; m < input.getTransitionProbabilities().length; ++m) {
-				denominator += alphas[t][i]
-						* input.getTransitionProbabilities()[i][j]
-						* input.getObservationProbabilities()[j][observation[t + 1]]
-						* betas[t + 1][j];
+				denominator += alphas[t][l]
+						* input.getTransitionProbabilities()[l][m]
+						* input.getObservationProbabilities()[m][observation[t + 1]]
+						* betas[t + 1][m];
 			}
 		}
 		return numerator / denominator;

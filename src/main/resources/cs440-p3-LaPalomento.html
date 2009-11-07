@@ -1,0 +1,371 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+    <title>CS440/640 Project 3: Hidden Markov Models and Natural Language Processing
+    </title>
+    <style type="text/css">
+        #heading1
+        {
+            color: #888888;
+            font: bold 2.8em arial, sans-serif;
+        }
+        #heading2
+        {
+            color: #555555;
+            font: bold 1.4em arial, sans-serif;
+        }
+        .heading3
+        {
+            color: #222;
+            font: bold .85em verdana, sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        #heading4
+        {
+            color: #222;
+            font: bold .85em verdana, sans-serif;
+        }
+        #container
+        {
+            text-align: justify;
+            width: 75%;
+            margin: 0 auto;
+            padding: 1em 2em;
+            background: #FFFFFF;
+            font: .8em "trebuchet ms" , arial, sans-serif;
+        }
+        table
+        {
+            font: 1em "trebuchet ms" , arial, sans-serif;
+        }
+        table th
+        {
+            color: #222;
+            text-align: left;
+            font: bold .9em "trebuchet ms" , arial, sans-serif;
+        }
+        body
+        {
+            background-color: #222222;
+        }
+        #container p
+        {
+            font-family: Verdana, Geneva, sans-serif;
+        }
+        #container pre
+        {
+            font-family: Verdana, Geneva, sans-serif;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="heading1">
+            CAS CS440/640 Artificial Intelligence - Fall 2009
+        </div>
+        <div id="heading2">
+            Project 3: Hidden Markov Models and Natural Language Processing
+        </div>
+        <br>
+        <table width="25%">
+            <tr>
+                <td>
+                    Justin Davis
+                </td>
+                <td>
+                    U02433206
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Abhinay Evani
+                </td>
+                <td>
+                    U25320026
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    David LaPalomento
+                </td>
+                <td>
+                    U62588858
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Howell Martinez
+                </td>
+                <td>
+                    U64454638
+                </td>
+            </tr>
+        </table>
+        <p>
+            &nbsp;</p>
+        <div id="heading4">
+            To Compile</div>
+        <ol>
+            <p>
+                Since all the classes belong to the package bu.edu, the command</p>
+            <p>
+                "javac bu/edu/App.java"
+            </p>
+            <p>
+                needs to be run from the java folder under src/main. (The above command needs to
+                be run after cd &lt;assignment folder&gt;/src/main/java).<br>
+            </p>
+        </ol>
+        <div id="heading4">
+            To Build</div>
+        <ol>
+            <p>
+                A single executable is generated from the code which accepts command-line arguments
+                to switch between the functions for model recognition, determination of optimal
+                statepath and model optimization by running
+            </p>
+            <p>
+                "java bu/edu/App "function" sentence.hmm examplefile.obs"
+            </p>
+            <p>
+                which also needs to be run from the java folder under src/main. The "function" part
+                of the command can be replaced by recognize, statepath and optimize for the respective
+                functions.<br>
+            </p>
+        </ol>
+        <div id="heading4">
+            <p>
+                Problems
+            </p>
+        </div>
+        <ol>
+            <li><a href="#part1">Pattern Recognition</a> </li>
+            <li><a href="#part2">State-Path Determination</a> </li>
+            <li><a href="#part3">Model Optimization</a> </li>
+            <li><a href="#part4">Model Enhancements</a></li>
+        </ol>
+        <br>
+        <a class="heading3" name="part1" id="part1">Pattern Recognition</a> <a href="#">[back
+            to top]</a><br>
+        <br>
+        <div id="heading4">
+            Problem Definition
+        </div>
+        <p>
+            Implement the "forward part" of the forward/backward procedure. Given the HMM and
+            several observation sequences, <code>recognize</code> should report the observation
+            probability of each input sequence.
+        </p>
+        <br>
+        <div id="heading4">
+            Method Implementation
+        </div>
+        <p>
+            Code: <a href="src/Forward.java">Forward.java</a>
+        </p>
+        <p>
+            The code uses objects to store the Hidden Markov Model and the Observations. Using
+            these objects, the code loops through the observations, calculates the forward values
+            for each observation dataset, and stores each iteration in the forward variable
+            array 'alpha'. The forward probability value is then output to the console.
+        </p>
+        <br>
+        <div id="heading4">
+            Results / Discussion
+        </div>
+        <p>
+            The results of the forward algorithm were as expected, matching the example output
+            provided in the write up.
+            <br />
+            <br />
+            Questions:
+        </p>
+        <ul>
+            <li>For the current application, why does this probability seem lower than we expect?
+                <ul>
+                    <li>The probability seems lower than we expect because the sentences for the first 2
+                        observations are very basic and match the highest probabilities yet the output probabilities
+                        are extremely low. Since the sentences are almost exactly what the Hidden Markov
+                        Model should recognize it is expected that the numbers be higher.</li>
+                </ul>
+            </li>
+            <li>What does this probability tell you?
+                <ul>
+                    <li>The forward probability computes a set of probabilities which provide the probability
+                        of observing the observations in the sequence and ending in each of the possible
+                        Hidden Markov Model states.</li>
+                </ul>
+            </li>
+            <li>Does the current HMM always give a reasonable answer?
+                <ul>
+                    <li>No. For example, the observation of "kids can play chess" only returns a probability
+                        of 0.27%. Considering the sentence is a valid sentence this is unexpected. However,
+                        when one looks at the probabilities it is noticed that the probability to go from
+                        AUXILIARY to PREDICATE is only 0.3 while the probability to go from AUXILIARY to
+                        SUBJECT is 0.7. It would seem that alpha and beta values need to be adjusted to
+                        make the HMM more accurate.</li>
+                </ul>
+            </li>
+            <li>What is the output probability for the below sentences?
+                <ul>
+                    <li>"robots do kids play chess" = 0.001512 = 0.1512%</li>
+                    <li>"chess eat play kids" = 0.0 = 0.0%</li>
+                </ul>
+            </li>
+        </ul>
+        <br>
+        <hr>
+        <br>
+        <a class="heading3" name="part2" id="part2">State-Path Determination</a> <a href="#">
+            [back to top]</a><br>
+        <br>
+        <div id="heading4">
+            Problem Definition
+        </div>
+        <p>
+            Implement the Viterbi algorithm to determine the optimal state path for each observation
+            set and report its probability.
+        </p>
+        <br>
+        <div id="heading4">
+            Method Implementation
+        </div>
+        <p>
+            Code: <a href="src/ViterbiAlgorithm.java">ViterbiAlgorithm.java</a>
+        </p>
+        <pre>The ViterbiAlgorithm class computes the optimal statepath for every single dataset received from the parser. It outputs the probability and the optimal state 
+sequence when the probability is not 0 for the same. Given the example datasets the ViterbiAlgorithm class seems to work properly. </pre>
+        <p>
+            The code uses objects to store the Hidden Markov Model and the Observations. For
+            each dataset received, the initialization, recursion, and termination steps of the
+            algorithm are implemented in the same order using the same objects defined as arrays.
+        </p>
+        <p>
+            Initialization phase sets the initial values for the <strong>&delta;</strong> array
+            named &quot;del&quot; and the <strong>&psi;</strong> array named &quot;si&quot;.
+            The arrays a b and pi from the algorithm are named similarly in the code.
+        </p>
+        <p>
+            The recursion phase loops from 1 to N through the arrays del and a to maximize the
+            value of del[t-1][i] * a[i][j] (indices are used differently in code as they are
+            used from 1 instead of 0). It also retains the value of the argument 'i' responsible
+            for the maximum value. This is repeated for every j and t running from 1toN and
+            2toT respectively.</p>
+        <p>
+            The termination and the state sequence backtracking phases work as described in
+            the paper.
+            <br>
+        </p>
+        <div id="heading4">
+            Results / Discussion
+        </div>
+        <p>
+            Questions:
+        </p>
+        <ul>
+            <li>What can we tell from the reported optimal path for syntax analysis purpose?
+                <ul>
+                    <li>The structure of a sentence can be determined from the optimal state path. This
+                        combined with syntax analysis can help determine the purpose of a sentence (Declarative
+                        or Interrogative). </li>
+                </ul>
+            </li>
+            <li>Can the HMM always correctly distinguish "statement" from "question" sentence? Why?
+                <ul>
+                    <li>The file example3.obs contains a few examples of Interrogative sentences formed
+                        using the vocabulary defined in sentence.hmm. The optimal statepath for all of these
+                        example sentences begins with an AUXILIARY in contrast to the optimal statepath
+                        for a declerative sentence which begins with a SUBJECT. Hence, the HMM can always
+                        be used to determine the difference between a declarative/"statement" sentence and
+                        an/a interrogative/"question" sentence. </li>
+                </ul>
+            </li>
+        </ul>
+        <br>
+        <hr>
+        <br>
+        <a class="heading3" name="part3" id="part3">Model Optimization</a> <a href="#">[back
+            to top]</a><br>
+        <br>
+        <div id="heading4">
+            Problem Definition
+        </div>
+        <p>
+            Optimize the HMM using the Baum-Welch algorithm and report the probabilities before
+            and after optimization.</p>
+        <br>
+        <div id="heading4">
+            Method Implementation
+        </div>
+	<p>
+	  The Baum-Welch algorithm is an optimization technique that incrementally produces more-suitable Hidden Markov Models for a given initial model and observation sets.  Our implementation is a very straight-forward adaption of the technique as described in the Rabiner paper.  A more advanced implementation might choose to refactor many of the calculations to avoid the number of iterations over the many indices in the input and intermediate values, for instance.  Values for alpha and beta are memo-ized to avoid repeated computation and the majority of the code threads state around explicitly as method parameters.  
+	</p>
+	<p>
+	  The new value for the probability of starting in state i is calculated as the expected number of times in state i up through time T - 1.  The new probability of observing value k at node j is defined as the sum of the probability of the expected number of time steps in state j where k is observed across all T divided by the probability of the number of time steps in state j.  The new transition probability from a state i to a state j is the sum across T - 1 of the probability of being at node i and transitioning to node j, divided by the sum across T - 1 of the expected number of times in node i.  The current implementation seems to correctly calculate new values for the probability of observing an output at a particular state.
+	</p>
+        <p>
+            Code: <a href="src/main/java/bu/edu/BaumWelchOptimizer.java">BaumWelch.java</a>
+        </p>
+        <br />
+        <br />
+	<div id="heading4">
+            Results / Discussion
+        </div>
+	<p>Why should you not try to optimize an HMM with zero observation probability?</p>
+	<p>
+	  The Baum-Welch algorithm uses the product of the observation probabilities in the denominator of a number of intermediate values for an HMM optimization.  If any of the observation probabilities is zero, the result will necessarily be undefined.
+	</p>
+        <hr />
+        <br />
+        <a class="heading3" name="part3" id="part4">Model Enhancement</a> <a href="#">[back
+            to top]</a>
+        <br />
+        <p>
+            This file includes the observation of Adverbs and their probabilities of occurences
+            for the given vocabulary.</p>
+        <p>
+            Source:&nbsp;<a href="enhancement.hmm">enhancement.hmm</a></p>
+        <p>
+            The Hidden Markov Model would need to be updated in multiple sections. There will
+            be a new node that represents the ADVERB and the vocabulary would need to be extended
+            to incorporate adverb words. Also, the matrices would need to be updated for a,
+            b, and pi for the correct probabilities. The following are those matrices:
+            <br />
+            <br />
+            a:
+            <br />
+            0.0 0.3 0.45 0.0 0.2 &nbsp;&nbsp;// The HMM can go from OBJECT to ADVERB
+            <br />
+            0.5 0.0 0.25 0.0 0.2 &nbsp;&nbsp;// with probability that is twice as much
+            <br />
+            0.0 0.0 0.0 1.0 0.2 &nbsp;&nbsp;&nbsp;// as those of when it goes from SUBJECT to
+            ADVERB,
+            <br />
+            0.0 0.0 0.0 0.5 0.4 &nbsp;&nbsp;&nbsp;// AUXILIARY to ADVERB, and ADVERB to ADVERB.
+            <br />
+            0.0 0.0 0.8 0.0 0.2 &nbsp;&nbsp;&nbsp;// The HMM can go only to PREDICATE and ADVERB
+            state from ADVERB state with PREDICATE having a higher probability.
+            <br />
+            <br />
+            b:
+            <br />
+            0.5 0.4 0.0 0.0 0.0 0.0 0.05 0.05
+            <br />
+            0.0 0.0 0.5 0.5 0.0 0.0 0.0 0.0
+            <br />
+            0.0 0.0 0.0 0.0 0.5 0.5 0.0 0.0
+            <br />
+            0.1 0.2 0.0 0.0 0.0 0.0 0.3 0.4
+            <br />
+            0.0 0.0 0.5 0.5 0.0 0.0 0.0 0.0 // At state ADVERB well/playfully can both occur
+            with equal (0.5) probability
+            <br />
+            <br />
+            pi:
+            <br />
+            0.6 0.3 0.1 0.0 0.0 //The initial state can never be an ADVERB</p>
+    </div>
+</body>
+</html>

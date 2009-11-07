@@ -8,14 +8,14 @@ public class Forward {
 		this.hmm = h;
 	}
 
-	private double recognize(int[] observation) {
+	public double recognize(int[] observation) {
 		int T = observation.length; // size of observation sequence
 		int N = hmm.getStates().size(); // number of state nodes
 		double[][] alpha = alpha(observation);
 		
 		double sum = 0;
 		for (int i = 0; i < N; i++)
-			sum += alpha[i][T-1];
+			sum += alpha[T-1][i];
 		
 		return sum;
 	}
@@ -41,9 +41,9 @@ public class Forward {
 				if (t == 0) // initialization
 					alpha[t][i] = pi[i] * B[i][observation[t]];
 				else {
-					for (int ii = 0; ii < N; ii++) {
-						alpha[t][i] += alpha[t - 1][ii] * A[ii][i];
-					}// ii = N
+					for (int j = 0; j < N; j++) {
+						alpha[t][i] += alpha[t - 1][j] * A[j][i];
+					}// j = N
 					
 					alpha[t][i] *= B[i][observation[t]];
 				}

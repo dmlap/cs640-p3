@@ -5,30 +5,30 @@ package bu.edu;
  */
 public class App {
 	public static void main(String[] args) {
-		if (args.length == 0) {
+		if (args.length == 3) {
 			String operation, hmmfile, obsfile;
 
-			// TODO: remove comment
-			/*
-			 * operation = args[0]; hmmfile = args[1]; obsfile = args[2];
-			 */
+			 operation = args[0]; 
+			 hmmfile = args[1]; obsfile = args[2];
 
-			// TODO: remove
-			operation = "statepath";
-			hmmfile = "C:\\sentence.hmm";
-			obsfile = "C:\\example1.obs";
-			
-			Parser parser = new Parser();
+			 Parser parser = new Parser();
 			HiddenMarkovModel hmm = parser.parseHMMfile(hmmfile);
 			Observations obs = parser.parseObsFile(obsfile);
+			BaumWelchOptimizer bwo = new BaumWelchOptimizer();
 
-			if (operation == "optimize")
-				; // TODO: call function
-			else if (operation == "recognize") {
+			if ("optimize".equals(operation)) {
+				Forward f = new Forward(hmm);
+				int[][] translateds = hmm.translate(obs);
+				for(int[] translated : translateds) {
+					System.out.print(f.recognize(translated));
+					System.out.print(" ");
+					System.out.println(new Forward(bwo.optimize(hmm, translated)).recognize(translated));
+				}
+			} else if ("recognize".equals(operation)) {
 				Forward fwd = new Forward(hmm);
 				fwd.recognizeDatasets(obs);
 			}
-			else if (operation == "statepath") {
+			else if ("statepath".equals(operation)) {
 				ViterbiAlgorithm viterbi = new ViterbiAlgorithm(hmm, obs);
 				viterbi.statepathofDatasets();
 			}
